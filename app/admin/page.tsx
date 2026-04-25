@@ -45,8 +45,8 @@ export default async function AdminPage() {
     supabase.from("images").select("*", { count: "exact", head: true }),
     supabase.from("profiles").select("*", { count: "exact", head: true }),
     supabase.from("caption_votes").select("*", { count: "exact", head: true }),
-    supabase.from("caption_votes").select("*", { count: "exact", head: true }).eq("vote", 1),
-    supabase.from("caption_votes").select("*", { count: "exact", head: true }).eq("vote", -1),
+    supabase.from("caption_votes").select("*", { count: "exact", head: true }).eq("vote_value", 1),
+    supabase.from("caption_votes").select("*", { count: "exact", head: true }).eq("vote_value", -1),
     supabase.from("captions").select("id, content, created_datetime_utc").order("created_datetime_utc", { ascending: false }).limit(20),
     supabase.from("profiles").select("id, email, first_name, last_name, is_superadmin, created_datetime_utc").order("created_datetime_utc", { ascending: false }).limit(50),
     supabase.from("images").select("id, url, created_datetime_utc").order("created_datetime_utc", { ascending: false }).limit(50),
@@ -62,7 +62,7 @@ export default async function AdminPage() {
     supabase.from("llm_model_responses").select("id, created_datetime_utc").order("created_datetime_utc", { ascending: false }).limit(20),
     supabase.from("allowed_signup_domains").select("id, domain, created_datetime_utc").order("created_datetime_utc", { ascending: false }).limit(50),
     supabase.from("whitelist_email_addresses").select("id, email, created_datetime_utc").order("created_datetime_utc", { ascending: false }).limit(50),
-    supabase.from("caption_votes").select("caption_id, vote, captions(content)").order("caption_id").limit(200),
+    supabase.from("caption_votes").select("caption_id, vote_value, captions(content)").order("caption_id").limit(200),
   ]);
 
   return (

@@ -34,14 +34,13 @@ export default function AdminTabs({
     whiteSpace: "nowrap" as const,
   });
 
-  // Aggregate vote counts per caption from raw votes
   const voteMap = new Map<string, { content: string; up: number; down: number }>();
   (topVotedCaptions ?? []).forEach((v: any) => {
     const id = v.caption_id;
     const content = v.captions?.content ?? "(no content)";
     if (!voteMap.has(id)) voteMap.set(id, { content, up: 0, down: 0 });
-    if (v.vote === 1) voteMap.get(id)!.up++;
-    if (v.vote === -1) voteMap.get(id)!.down++;
+    if (v.vote_value === 1) voteMap.get(id)!.up++;
+    if (v.vote_value === -1) voteMap.get(id)!.down++;
   });
   const sortedCaptions = Array.from(voteMap.entries())
     .map(([id, d]) => ({ id, ...d, total: d.up + d.down, score: d.up - d.down }))
@@ -61,8 +60,6 @@ export default function AdminTabs({
       {active === "Caption Stats" && (
         <div>
           <h2 style={{ fontSize: "1.1rem", fontWeight: 600, marginBottom: "1.5rem", color: "#f0ede8" }}>Caption Rating Statistics</h2>
-
-          {/* Vote breakdown */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "1px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.06)", marginBottom: "2rem" }}>
             {[
               { num: totalVotes, label: "Total Votes" },
@@ -75,8 +72,6 @@ export default function AdminTabs({
               </div>
             ))}
           </div>
-
-          {/* Upvote % bar */}
           <div style={{ background: "#0e0e0e", border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", padding: "1.25rem 1.5rem", marginBottom: "2rem" }}>
             <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.75rem" }}>
               <span style={{ fontSize: "0.8rem", color: "rgba(240,237,232,0.6)" }}>Upvote Rate</span>
@@ -86,8 +81,6 @@ export default function AdminTabs({
               <div style={{ height: "100%", width: `${upvotePct}%`, background: "#ff4d00", borderRadius: "999px", transition: "width 0.5s" }} />
             </div>
           </div>
-
-          {/* Top voted captions table */}
           <h3 style={{ fontSize: "0.85rem", fontWeight: 600, color: "rgba(240,237,232,0.5)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "1rem" }}>Most Voted Captions</h3>
           <div style={{ border: "1px solid rgba(255,255,255,0.08)", borderRadius: "12px", overflow: "hidden" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.82rem" }}>
@@ -117,49 +110,21 @@ export default function AdminTabs({
         </div>
       )}
 
-      {active === "Captions" && (
-        <SimpleTable title="Captions (Read Only)" rows={captions} columns={["id", "content", "created_datetime_utc"]} />
-      )}
-      {active === "Users" && (
-        <SimpleTable title="Users / Profiles (Read Only)" rows={profiles} columns={["email", "first_name", "last_name", "is_superadmin", "created_datetime_utc"]} />
-      )}
+      {active === "Captions" && <SimpleTable title="Captions (Read Only)" rows={captions} columns={["id", "content", "created_datetime_utc"]} />}
+      {active === "Users" && <SimpleTable title="Users / Profiles (Read Only)" rows={profiles} columns={["email", "first_name", "last_name", "is_superadmin", "created_datetime_utc"]} />}
       {active === "Images" && <ImagesManager initialImages={images} />}
-      {active === "Humor Flavors" && (
-        <SimpleTable title="Humor Flavors (Read Only)" rows={humorFlavors} columns={["id", "name", "description", "created_datetime_utc"]} />
-      )}
-      {active === "Flavor Steps" && (
-        <SimpleTable title="Humor Flavor Steps (Read Only)" rows={flavorSteps} columns={["id", "humor_flavor_id", "order_by", "llm_temperature", "created_datetime_utc"]} />
-      )}
-      {active === "Humor Mix" && (
-        <SimpleTable title="Humor Mix (Read Only)" rows={humorMix} columns={["id", "created_datetime_utc"]} />
-      )}
-      {active === "Terms" && (
-        <CrudManager title="Terms" table="terms" rows={terms} columns={["term", "definition"]} displayColumns={["id", "term", "definition", "created_datetime_utc"]} />
-      )}
-      {active === "Caption Requests" && (
-        <SimpleTable title="Caption Requests (Read Only)" rows={captionRequests} columns={["id", "created_datetime_utc"]} />
-      )}
-      {active === "Caption Examples" && (
-        <CrudManager title="Caption Examples" table="caption_examples" rows={captionExamples} columns={["caption", "image_id"]} displayColumns={["id", "created_datetime_utc"]} />
-      )}
-      {active === "LLM Models" && (
-        <CrudManager title="LLM Models" table="llm_models" rows={llmModels} columns={["name"]} displayColumns={["id", "name", "created_datetime_utc"]} />
-      )}
-      {active === "LLM Providers" && (
-        <CrudManager title="LLM Providers" table="llm_providers" rows={llmProviders} columns={["name"]} displayColumns={["id", "name", "created_datetime_utc"]} />
-      )}
-      {active === "Prompt Chains" && (
-        <SimpleTable title="LLM Prompt Chains (Read Only)" rows={llmPromptChains} columns={["id", "created_datetime_utc"]} />
-      )}
-      {active === "LLM Responses" && (
-        <SimpleTable title="LLM Responses (Read Only)" rows={llmResponses} columns={["id", "created_datetime_utc"]} />
-      )}
-      {active === "Allowed Domains" && (
-        <CrudManager title="Allowed Signup Domains" table="allowed_signup_domains" rows={allowedDomains} columns={["domain"]} displayColumns={["id", "domain", "created_datetime_utc"]} />
-      )}
-      {active === "Whitelist Emails" && (
-        <CrudManager title="Whitelisted Email Addresses" table="whitelist_email_addresses" rows={whitelistEmails} columns={["email"]} displayColumns={["id", "email", "created_datetime_utc"]} />
-      )}
+      {active === "Humor Flavors" && <SimpleTable title="Humor Flavors (Read Only)" rows={humorFlavors} columns={["id", "name", "description", "created_datetime_utc"]} />}
+      {active === "Flavor Steps" && <SimpleTable title="Humor Flavor Steps (Read Only)" rows={flavorSteps} columns={["id", "humor_flavor_id", "order_by", "llm_temperature", "created_datetime_utc"]} />}
+      {active === "Humor Mix" && <SimpleTable title="Humor Mix (Read Only)" rows={humorMix} columns={["id", "created_datetime_utc"]} />}
+      {active === "Terms" && <CrudManager title="Terms" table="terms" rows={terms} columns={["term", "definition"]} displayColumns={["id", "term", "definition", "created_datetime_utc"]} />}
+      {active === "Caption Requests" && <SimpleTable title="Caption Requests (Read Only)" rows={captionRequests} columns={["id", "created_datetime_utc"]} />}
+      {active === "Caption Examples" && <CrudManager title="Caption Examples" table="caption_examples" rows={captionExamples} columns={["caption", "image_id"]} displayColumns={["id", "created_datetime_utc"]} />}
+      {active === "LLM Models" && <CrudManager title="LLM Models" table="llm_models" rows={llmModels} columns={["name"]} displayColumns={["id", "name", "created_datetime_utc"]} />}
+      {active === "LLM Providers" && <CrudManager title="LLM Providers" table="llm_providers" rows={llmProviders} columns={["name"]} displayColumns={["id", "name", "created_datetime_utc"]} />}
+      {active === "Prompt Chains" && <SimpleTable title="LLM Prompt Chains (Read Only)" rows={llmPromptChains} columns={["id", "created_datetime_utc"]} />}
+      {active === "LLM Responses" && <SimpleTable title="LLM Responses (Read Only)" rows={llmResponses} columns={["id", "created_datetime_utc"]} />}
+      {active === "Allowed Domains" && <CrudManager title="Allowed Signup Domains" table="allowed_signup_domains" rows={allowedDomains} columns={["domain"]} displayColumns={["id", "domain", "created_datetime_utc"]} />}
+      {active === "Whitelist Emails" && <CrudManager title="Whitelisted Email Addresses" table="whitelist_email_addresses" rows={whitelistEmails} columns={["email"]} displayColumns={["id", "email", "created_datetime_utc"]} />}
     </div>
   );
 }
