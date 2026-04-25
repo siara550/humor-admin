@@ -22,6 +22,8 @@ export default async function AdminPage() {
     { count: totalImages },
     { count: totalProfiles },
     { count: totalVotes },
+    { count: totalUpvotes },
+    { count: totalDownvotes },
     { data: captions },
     { data: profiles },
     { data: images },
@@ -37,11 +39,14 @@ export default async function AdminPage() {
     { data: llmResponses },
     { data: allowedDomains },
     { data: whitelistEmails },
+    { data: topVotedCaptions },
   ] = await Promise.all([
     supabase.from("captions").select("*", { count: "exact", head: true }),
     supabase.from("images").select("*", { count: "exact", head: true }),
     supabase.from("profiles").select("*", { count: "exact", head: true }),
     supabase.from("caption_votes").select("*", { count: "exact", head: true }),
+    supabase.from("caption_votes").select("*", { count: "exact", head: true }).eq("vote", 1),
+    supabase.from("caption_votes").select("*", { count: "exact", head: true }).eq("vote", -1),
     supabase.from("captions").select("id, content, created_datetime_utc").order("created_datetime_utc", { ascending: false }).limit(20),
     supabase.from("profiles").select("id, email, first_name, last_name, is_superadmin, created_datetime_utc").order("created_datetime_utc", { ascending: false }).limit(50),
     supabase.from("images").select("id, url, created_datetime_utc").order("created_datetime_utc", { ascending: false }).limit(50),
@@ -57,6 +62,7 @@ export default async function AdminPage() {
     supabase.from("llm_model_responses").select("id, created_datetime_utc").order("created_datetime_utc", { ascending: false }).limit(20),
     supabase.from("allowed_signup_domains").select("id, domain, created_datetime_utc").order("created_datetime_utc", { ascending: false }).limit(50),
     supabase.from("whitelist_email_addresses").select("id, email, created_datetime_utc").order("created_datetime_utc", { ascending: false }).limit(50),
+    supabase.from("caption_votes").select("caption_id, vote, captions(content)").order("caption_id").limit(200),
   ]);
 
   return (
@@ -70,7 +76,6 @@ export default async function AdminPage() {
         <p style={{ fontSize: "0.7rem", letterSpacing: "0.2em", textTransform: "uppercase", color: "#ff4d00", marginBottom: "0.25rem" }}>Superadmin · {user.email}</p>
         <h1 style={{ fontSize: "2.5rem", fontWeight: 700, marginBottom: "2rem" }}>Data Dashboard</h1>
 
-        {/* STATS */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: "1px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.06)", marginBottom: "2.5rem" }}>
           {[
             { num: totalCaptions, label: "Captions" },
@@ -101,6 +106,10 @@ export default async function AdminPage() {
           llmResponses={llmResponses ?? []}
           allowedDomains={allowedDomains ?? []}
           whitelistEmails={whitelistEmails ?? []}
+          totalUpvotes={totalUpvotes ?? 0}
+          totalDownvotes={totalDownvotes ?? 0}
+          totalVotes={totalVotes ?? 0}
+          topVotedCaptions={topVotedCaptions ?? []}
         />
       </div>
     </div>
